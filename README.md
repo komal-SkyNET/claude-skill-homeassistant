@@ -5,6 +5,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude-Code-8A2BE2)](https://github.com/anthropics/claude-code)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Compatible-41BDF5)](https://www.home-assistant.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![SkillCheck](https://img.shields.io/badge/SkillCheck-PASS-brightgreen?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik05IDE2LjE3TDQuODMgMTJsLTEuNDIgMS40MUw5IDE5IDIxIDdsLTEuNDEtMS40MXoiLz48L3N2Zz4=)](https://getskillcheck.com)
 
 ![Tablet Dashboard Example](dashboard.png)
 *Example tablet-optimized dashboard built using this skill - touch-friendly controls, color-coded status, and responsive grid layout*
