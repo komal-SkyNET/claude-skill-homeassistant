@@ -1,6 +1,28 @@
 home-assistant-manager — Release Notes
 Versioning: Semantic Versioning (MAJOR.MINOR.PATCH) — https://semver.org
 
+## v1.1.0 — 2026-07-05
+Automation authoring coverage and safety/verification precision.
+
+Added
+- reference/automations.md — automation deep-dive loaded on demand: legacy→modern syntax
+  table (2024.10 rename), mode behavior (single/restart/queued/parallel), blueprints
+  (location, use_blueprint, reload semantics), trace-based debugging, pitfalls table.
+- SKILL.md "Automations — write modern syntax" section: emit `triggers:/conditions:/actions:`,
+  `trigger:` not `platform:`, `action:` not `service:`; require stable `id:` + `alias`.
+  Counters the deprecated pre-2024.10 syntax LLMs default to.
+- Verify loop: documented that `automation.trigger` bypasses `conditions` by default
+  (`skip_condition`), so a manual trigger proves actions, not the gate.
+- Safety net: `ha backups new --name pre-<change>` before risky configuration.yaml
+  changes or integration removal.
+- README: "How is this different from an HA MCP server?" section — the skill encodes
+  procedure/judgment, MCP provides live tools; they compose (answers issue #4).
+
+Changed
+- `root@homeassistant.local` is now explicitly a placeholder: resolve the real user/host
+  once (project CLAUDE.md, ~/.ssh/config, or ask) and record it in the project CLAUDE.md.
+- Skill description mentions blueprints and traces for better trigger matching.
+
 ## v1.0.0 — 2026-06-21
 First formally versioned release. Modernizes and slims the skill for efficient,
 precise Home Assistant management.

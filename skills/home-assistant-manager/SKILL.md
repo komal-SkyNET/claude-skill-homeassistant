@@ -1,6 +1,6 @@
 ---
 name: home-assistant-manager
-description: Manage Home Assistant configuration safely and fast — edit and deploy YAML (automations, scripts, scenes, templates, MQTT), validate with ha core check, deploy via git or rapid scp, reload-vs-restart correctly, verify changes from logs and entity state, and build Lovelace dashboards. Use for any Home Assistant config, automation, template, or dashboard work over SSH/hass-cli/MCP.
+description: Manage Home Assistant configuration safely and fast — edit and deploy YAML (automations, blueprints, scripts, scenes, templates, MQTT), validate with ha core check, deploy via git or rapid scp, reload-vs-restart correctly, verify changes from logs, traces and entity state, and build Lovelace dashboards. Use for any Home Assistant config, automation, template, or dashboard work over SSH/hass-cli/MCP.
 ---
 
 # Home Assistant Manager
@@ -9,8 +9,11 @@ Operate a remote Home Assistant instance precisely: make a change, get it live, 
 worked. Optimize for the fewest safe round-trips.
 
 ## Assumptions
-- The repo you're editing **is** the HA `/config` dir, git-connected to the instance
-  (typically `root@homeassistant.local`). Edits aren't live until pulled on the instance.
+- The repo you're editing **is** the HA `/config` dir, git-connected to the instance.
+  Edits aren't live until pulled on the instance.
+- `root@homeassistant.local` in examples is a placeholder. Resolve the real user/host once
+  (project CLAUDE.md, `~/.ssh/config`, or ask) and if it isn't recorded in the project
+  CLAUDE.md yet, add it so future sessions skip this step.
 - Access via one or more of: `hass-cli` (REST), SSH `ha`, or an MCP server (see below).
 - Only edit `.yaml`/`.yml`/`.md`. Never read/write `.env` or `secrets.yaml`; use `!secret`.
 
@@ -48,13 +51,17 @@ you immediately. Always run it before a *restart* or for `configuration.yaml` ch
 | automations, scripts, scenes, groups, template entities, themes | **reload** the domain (`hass-cli service call automation.reload`, etc.) |
 | `configuration.yaml` core, new integrations, platform sensors (min/max), MQTT sensor/binary_sensor platforms, dashboard registry (`lovelace_dashboards`) | **restart** (`ssh … "ha core restart"`, ~30s) |
 
-Prefer reload. Never restart without a passing `ha core check`.
+Prefer reload. Never restart without a passing `ha core check`. Before risky changes
+(core `configuration.yaml` surgery, removing an integration), snapshot first — it's cheap:
+`ssh root@homeassistant.local "ha backups new --name pre-<change>"`.
 
 ## Verify — don't assume it worked
 1. Reload/restart the right domain.
 2. For automations, **trigger manually** for instant feedback:
    `hass-cli service call automation.trigger --arguments entity_id=automation.<id>`
-   (or call the service via MCP).
+   (or call the service via MCP). This **bypasses `conditions` by default** — it proves the
+   actions, not the gate. To test conditions too, pass `skip_condition: false` or exercise
+   the real trigger, then read the automation's trace in the UI.
 3. Read the logs filtered to your change:
    `ssh root@homeassistant.local "ha core logs | grep -iE '<name>|error' | tail -20"`.
    Good: `Running automation actions`, `Executing step …`. Bad: `Invalid data for
@@ -62,6 +69,16 @@ Prefer reload. Never restart without a passing `ha core check`.
 4. Confirm the real outcome: device/sensor state (`hass-cli state get <entity>`), or ask
    the user for notification-type actions.
 5. On error: fix → re-pull/scp → reload → re-check. Loop until clean.
+
+## Automations — write modern syntax
+HA 2024.10 renamed the keys; legacy syntax still works but don't emit it in new code:
+top-level `triggers:/conditions:/actions:` (plural), `trigger:` not `platform:` inside a
+trigger, `action:` not `service:` for calls. Every automation gets a stable `id:` (traces
+and UI editing need it) plus an `alias`.
+
+**Full automation reference** (syntax table, `mode:` behavior, blueprints, trace debugging,
+pitfalls) → read [`reference/automations.md`](reference/automations.md) when writing or
+debugging automations.
 
 ## Templates — the precision rules
 - Always coerce types before comparing: `states('sensor.x') | int(0) < 7`. Bare states are

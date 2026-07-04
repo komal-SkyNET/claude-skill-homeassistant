@@ -37,7 +37,9 @@ This Claude Code skill transforms Claude into a **Home Assistant expert** that h
 - **Remote CLI Access**: Seamlessly manages HA instances via SSH and `hass-cli`
 
 ### Automation Development
-- **Complete Verification Protocol**: Automatically tests automations by triggering manually and checking logs
+- **Modern Syntax by Default**: Writes current (2024.10+) automation YAML — `triggers:/conditions:/actions:`, `action:` not `service:` — instead of the deprecated syntax LLMs tend to emit
+- **Complete Verification Protocol**: Automatically tests automations by triggering manually and checking logs and traces — including the `automation.trigger`-skips-conditions gotcha
+- **Blueprints & Modes**: Knows blueprint structure/usage and when an automation needs `mode: restart` vs `single`
 - **Error Detection**: Identifies template errors, type mismatches, and execution failures
 - **Log Analysis Patterns**: Knows what success and error indicators to look for
 - **Iterative Fix Workflow**: Guides through debugging and re-testing cycles
@@ -57,6 +59,15 @@ This Claude Code skill transforms Claude into a **Home Assistant expert** that h
 - **No Restart for Dashboards**: Deploys dashboard changes with just browser refresh
 - **Context7 Integration**: Leverages official HA documentation via MCP when available
 - **Deployment Decision Tree**: Guides through the optimal workflow based on change type
+
+## 🆚 How Is This Different From an HA MCP Server?
+
+They solve different problems, and they compose:
+
+- **MCP servers** (the official `mcp_server` integration or community `ha-mcp`) give Claude **live tools** — read entity state, call services, control devices. They don't teach Claude *how to work on your config*.
+- **This skill** encodes the **procedure and judgment**: the git/scp deploy pipeline, reload-vs-restart decisions, validate-before-restart discipline, the verify-from-logs-and-traces loop, template type-safety rules, dashboard storage-cache gotchas, and modern automation syntax.
+
+Without the skill, an MCP-equipped Claude can flip your lights but will still happily restart HA on an unvalidated config or write deprecated automation YAML. Without MCP, the skill falls back to SSH/`hass-cli`. Together is best: the skill explicitly prefers MCP tools for live state and service calls when available.
 
 ## 📦 Installation
 
@@ -285,6 +296,7 @@ claude-skill-homeassistant/
 │       ├── SKILL.md              # Main skill content with YAML frontmatter
 │       ├── dashboard.png
 │       └── reference/
+│           ├── automations.md    # Modern syntax, modes, blueprints, traces — on demand
 │           └── dashboards.md     # Lovelace deep-dive, loaded on demand
 ├── README.md              # This file
 └── LICENSE                # MIT License
